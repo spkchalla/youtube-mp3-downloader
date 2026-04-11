@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Shield, Trash2, UserPlus, UserMinus, Loader2, Search } from 'lucide-react';
 
@@ -15,7 +15,7 @@ const Admin = () => {
 
     const fetchUsers = async () => {
         try {
-            const { data } = await axios.get('/api/admin/users', {
+            const { data } = await api.get('/api/admin/users', {
                 headers: { Authorization: `Bearer ${currentUser.token}` }
             });
             setUsers(data);
@@ -29,7 +29,7 @@ const Admin = () => {
     const handleUpdateRole = async (userId, currentRole) => {
         const newRole = currentRole === 'admin' ? 'user' : 'admin';
         try {
-            await axios.put(`/api/admin/users/${userId}`, { role: newRole }, {
+            await api.put(`/api/admin/users/${userId}`, { role: newRole }, {
                 headers: { Authorization: `Bearer ${currentUser.token}` }
             });
             setUsers(users.map(u => u._id === userId ? { ...u, role: newRole } : u));
@@ -41,7 +41,7 @@ const Admin = () => {
     const handleDeleteUser = async (userId) => {
         if (!window.confirm('Are you sure you want to delete this user?')) return;
         try {
-            await axios.delete(`/api/admin/users/${userId}`, {
+            await api.delete(`/api/admin/users/${userId}`, {
                 headers: { Authorization: `Bearer ${currentUser.token}` }
             });
             setUsers(users.filter(u => u._id !== userId));

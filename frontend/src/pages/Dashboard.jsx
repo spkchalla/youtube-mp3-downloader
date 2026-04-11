@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LogOut, User, Mail, Shield, Download, Link as LinkIcon, Loader2 } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const Dashboard = () => {
     const { user, logout } = useAuth();
@@ -15,7 +15,7 @@ const Dashboard = () => {
         setError('');
 
         try {
-            const response = await axios.post('/api/download', { url }, {
+            const response = await api.post('/api/download', { url }, {
                 responseType: 'blob',
                 headers: {
                     Authorization: `Bearer ${user.token}`

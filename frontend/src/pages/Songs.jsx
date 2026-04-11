@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Download, Trash2, Music, Loader2, AlertTriangle } from 'lucide-react';
 
@@ -17,7 +17,7 @@ const Songs = () => {
 
     const fetchSongs = async () => {
         try {
-            const { data } = await axios.get('/api/songs', {
+            const { data } = await api.get('/api/songs', {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setSongs(data);
@@ -31,7 +31,7 @@ const Songs = () => {
     const handleDelete = async () => {
         setIsDeleting(true);
         try {
-            await axios.delete(`/api/songs/${deleteId}`, {
+            await api.delete(`/api/songs/${deleteId}`, {
                 headers: { Authorization: `Bearer ${user.token}` }
             });
             setSongs(songs.filter(s => s._id !== deleteId));
@@ -46,7 +46,7 @@ const Songs = () => {
     const handleDownloadAgain = async (song) => {
         setIsDownloading(song._id);
         try {
-            const response = await axios.post('/api/download', { url: song.url }, {
+            const response = await api.post('/api/download', { url: song.url }, {
                 responseType: 'blob',
                 headers: { Authorization: `Bearer ${user.token}` }
             });
