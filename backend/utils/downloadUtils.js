@@ -18,12 +18,10 @@ export const generateFilePath = () => {
  */
 export const runYtDlp = (url, filePath) => {
     return new Promise((resolve, reject) => {
-        // -x: extract audio
-        // --audio-format mp3: convert to mp3
-        // --no-warnings: skip non-critical output
-        const downloadCommand = `yt-dlp --no-warnings -x --audio-format mp3 -o "${filePath}" "${url}"`;
+        // Use local if global not found
+        const command = `(yt-dlp --version &> /dev/null && yt-dlp || ./yt-dlp) --no-warnings -x --audio-format mp3 -o "${filePath}" "${url}"`;
 
-        exec(downloadCommand, (error, stdout, stderr) => {
+        exec(command, (error, stdout, stderr) => {
             if (error) {
                 console.error('yt-dlp error:', error);
                 console.error('yt-dlp stderr:', stderr);

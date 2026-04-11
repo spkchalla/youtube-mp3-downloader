@@ -21,30 +21,19 @@ const execPromise = (command) => {
  * @param {string} url 
  * @returns {Promise<{title: string, uploader: string, duration: number, videoId: string, thumbnail: string}>}
  */
-export async function getMetadata(url) {
-    try {
-        // -j returns the info json
-        const command = `yt-dlp --no-warnings -j "${url}"`;
-        const stdout = await execPromise(command);
+        : metadata.thumbnail;
 
-        const metadata = JSON.parse(stdout);
-
-        // Pick the highest resolution thumbnail (usually the last in the array)
-        const thumbnail = metadata.thumbnails?.length
-            ? metadata.thumbnails.at(-1).url
-            : metadata.thumbnail;
-
-        return {
-            title: metadata.title,
-            uploader: metadata.uploader,
-            duration: metadata.duration,
-            videoId: metadata.id,
-            thumbnail: thumbnail
-        };
-    } catch (error) {
-        if (error instanceof SyntaxError) {
-            throw new Error('Failed to parse yt-dlp output');
-        }
-        throw new Error(`yt-dlp metadata extraction failed: ${error.message}`);
+return {
+    title: metadata.title,
+    uploader: metadata.uploader,
+    duration: metadata.duration,
+    videoId: metadata.id,
+    thumbnail: thumbnail
+};
+} catch (error) {
+    if (error instanceof SyntaxError) {
+        throw new Error('Failed to parse yt-dlp output');
     }
+    throw new Error(`yt-dlp metadata extraction failed: ${error.message}`);
+}
 }
