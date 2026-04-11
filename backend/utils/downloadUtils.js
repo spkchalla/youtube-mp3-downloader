@@ -10,23 +10,26 @@ export const generateFilePath = () => {
     return path.join('temp', fileName);
 };
 
+/**
+ * Executes yt-dlp to download and convert to mp3
+ * @param {string} url 
+ * @param {string} filePath 
+ * @returns {Promise<void>}
+ */
 export const runYtDlp = (url, filePath) => {
     return new Promise((resolve, reject) => {
-        // Extract metadata first
-        const metadataCommand = `yt-dlp --print "%(title)s|%(thumbnail)s|%(duration_string)s" "${url}"`;
+        // -x: extract audio
+        // --audio-format mp3: convert to mp3
+        // --no-warnings: skip non-critical output
+        const downloadCommand = `yt-dlp --no-warnings -x --audio-format mp3 -o "${filePath}" "${url}"`;
 
-        exec(metadataCommand, (metaErr, metaStdout) => {
-            const [title, thumbnail, duration] = metaStdout ? metaStdout.trim().split('|') : ['Unknown Title', '', ''];
-
-            const downloadCommand = `yt-dlp -x --audio-format mp3 --embed-thumbnail --add-metadata -o "${filePath}" "${url}"`;
-
-            exec(downloadCommand, (error, stdout, stderr) => {
-                if (error) {
-                    console.error('yt-dlp error:', error);
-                    return reject(error);
-                }
-                resolve({ title, thumbnail, duration, stdout });
-            });
+        exec(downloadCommand, (error, stdout, stderr) => {
+            if (error) {
+                console.error('yt-dlp error:', error);
+                console.error('yt-dlp stderr:', stderr);
+                return reject(error);
+            }
+            resolve();
         });
     });
 };

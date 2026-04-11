@@ -62,7 +62,15 @@ export const downloadMp3 = async (req, res) => {
         });
     } catch (error) {
         isDownloading = false;
-        console.error('Download failed:', error);
-        res.status(500).json({ message: 'Download failed' });
+        console.error('Download process failed:', {
+            url,
+            userId,
+            errorMessage: error.message,
+            stack: error.stack
+        });
+        res.status(500).json({
+            message: 'Download failed',
+            details: error.message
+        });
     }
 };

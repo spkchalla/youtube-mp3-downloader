@@ -24,7 +24,7 @@ const execPromise = (command) => {
 export async function getMetadata(url) {
     try {
         // -j returns the info json
-        const command = `yt-dlp -j "${url}"`;
+        const command = `yt-dlp --no-warnings -j "${url}"`;
         const stdout = await execPromise(command);
 
         const metadata = JSON.parse(stdout);
