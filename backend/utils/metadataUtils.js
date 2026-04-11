@@ -1,30 +1,32 @@
 import { execFile } from 'child_process';
 import { promisify } from 'util';
-import path from 'path';
-import fs from 'fs';
 
 const execFilePromise = promisify(execFile);
 
 export const getMetadata = async (url) => {
-    // 1. Determine which binary to use
-    // Check if the local ./yt-dlp we downloaded in the bash script exists
-    const localPath = path.join(process.cwd(), 'yt-dlp');
-    const command = fs.existsSync(localPath) ? localPath : 'yt-dlp';
+    // Docker ensures 'yt-dlp' is in the system PATH
+    const command = 'yt-dlp';
 
     try {
-        console.log(`Extracting metadata using: ${command} for URL: ${url}`);
+        console.log(`Extracting metadata for: ${url}`);
 
-        // 2. Execute directly (no shell involved, no "word unexpected" errors)
+        // Execute globally
         const { stdout } = await execFilePromise(command, [
             '--no-warnings',
-            '-j',            // Output JSON metadata
-            '--no-playlist', // Ensure we only get one video
+            '-j',
+            '--no-playlist',
             url
         ]);
 
         return JSON.parse(stdout);
     } catch (error) {
-        console.error('yt-dlp execution error:', error.message);
-        throw new Error(`Failed to extract metadata: ${error.message}`);
+        console.error('Execution Error:', error.message);
+
+        // This helps you debug if the binary is truly missing or just failing
+        if (error.code === 'ENOENT') {
+            throw new Error("yt-dlp not found in Docker PATH. Check Dockerfile installation.");
+        }
+
+        throw new Error(`yt-dlp failed: ${error.message}`);
     }
 };
