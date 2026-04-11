@@ -1,12 +1,11 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../model/User.js';
+import dotenv from 'dotenv';
 
-const JWT_SECRET = process.env.JWT_SECRET;
+dotenv.config();
 
-if (!JWT_SECRET) {
-    console.warn('WARNING: JWT_SECRET not found in environment variables. Falling back to insecure default.');
-}
+const JWT_SECRET = process.env.JWT_SECRET || 'yoursecretkey';
 
 export const hashPassword = async (password) => {
     const salt = await bcrypt.genSalt(10);

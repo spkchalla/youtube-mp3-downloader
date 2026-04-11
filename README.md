@@ -67,22 +67,9 @@ npm run dev
   node scripts/makeAdmin.js your_email@example.com
   ```
 
-## Running with Docker
-
-### 1. Build and Run Backend
-```bash
-cd backend
-docker build -t youtube-mp3-backend .
-docker run -p 5000:5000 --env-file .env youtube-mp3-backend
-```
-
-### 2. Using Docker Compose (Recommended)
-If you have `docker-compose.yml` in the root:
-```bash
-docker-compose up --build
-```
-
 ---
+
+## License
 
 ## License
 MIT

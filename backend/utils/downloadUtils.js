@@ -11,18 +11,11 @@ export const generateFilePath = () => {
 
 /**
  * Executes yt-dlp to download and convert to mp3
- * @param {string} url 
- * @param {string} filePath 
- * @returns {Promise<void>}
+ * Focused on local execution.
  */
 export const runYtDlp = async (url, filePath) => {
-    // Determine binary (fallback for local dev)
-    const localPath = path.join(process.cwd(), 'yt-dlp');
-    const importFs = await import('fs');
-    const command = importFs.default.existsSync(localPath) ? localPath : 'yt-dlp';
-
     try {
-        await execFilePromise(command, [
+        await execFilePromise('yt-dlp', [
             '--no-warnings',
             '-x',
             '--audio-format', 'mp3',
@@ -30,7 +23,7 @@ export const runYtDlp = async (url, filePath) => {
             url
         ]);
     } catch (error) {
-        console.error('yt-dlp download error:', error.message);
+        console.error('yt-dlp error:', error.message);
         throw error;
     }
 };
