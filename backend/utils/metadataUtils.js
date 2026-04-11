@@ -1,51 +1,30 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+import path from 'path';
+import fs from 'fs';
 
-/**
- * Wraps child_process.exec in a Promise
- * @param {string} command 
- * @returns {Promise<string>}
- */
-const execPromise = (command) => {
-    return new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                return reject(error);
-            }
-            resolve(stdout.trim());
-        });
-    });
-};
+const execFilePromise = promisify(execFile);
 
-/**
- * Extracts metadata from a YouTube URL using yt-dlp
- * @param {string} url 
- * @returns {Promise<{title: string, uploader: string, duration: number, videoId: string, thumbnail: string}>}
- */
-export async function getMetadata(url) {
+export const getMetadata = async (url) => {
+    // 1. Determine which binary to use
+    // Check if the local ./yt-dlp we downloaded in the bash script exists
+    const localPath = path.join(process.cwd(), 'yt-dlp');
+    const command = fs.existsSync(localPath) ? localPath : 'yt-dlp';
+
     try {
-        // Use local if global not found (for Render)
-        // command -v is more portable than --version check
-        const command = `(command -v yt-dlp > /dev/null 2>&1 && yt-dlp || ./yt-dlp) --no-warnings -j "${url}"`;
-        const stdout = await execPromise(command);
+        console.log(`Extracting metadata using: ${command} for URL: ${url}`);
 
-        const metadata = JSON.parse(stdout);
+        // 2. Execute directly (no shell involved, no "word unexpected" errors)
+        const { stdout } = await execFilePromise(command, [
+            '--no-warnings',
+            '-j',            // Output JSON metadata
+            '--no-playlist', // Ensure we only get one video
+            url
+        ]);
 
-        // Pick the highest resolution thumbnail
-        const thumbnail = metadata.thumbnails?.length
-            ? metadata.thumbnails.at(-1).url
-            : metadata.thumbnail;
-
-        return {
-            title: metadata.title,
-            uploader: metadata.uploader,
-            duration: metadata.duration,
-            videoId: metadata.id,
-            thumbnail: thumbnail
-        };
+        return JSON.parse(stdout);
     } catch (error) {
-        if (error instanceof SyntaxError) {
-            throw new Error('Failed to parse yt-dlp output');
-        }
-        throw new Error(`yt-dlp metadata extraction failed: ${error.message}`);
+        console.error('yt-dlp execution error:', error.message);
+        throw new Error(`Failed to extract metadata: ${error.message}`);
     }
-}
+};
