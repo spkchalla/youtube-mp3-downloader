@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
 import downloadRoutes from './routes/downloadRoutes.js';
 import songRoutes from './routes/songRoutes.js';
@@ -8,6 +9,13 @@ import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 const app = express();
+
+app.use(cors({
+    origin: ['http://music.spkumarchalla.com', 'https://music.spkumarchalla.com', 'http://localhost:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
+}));
 
 app.use(express.json());
 
