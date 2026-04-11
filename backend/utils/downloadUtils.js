@@ -19,7 +19,7 @@ export const generateFilePath = () => {
 export const runYtDlp = (url, filePath) => {
     return new Promise((resolve, reject) => {
         // Use local if global not found
-        const command = `(yt-dlp --version &> /dev/null && yt-dlp || ./yt-dlp) --no-warnings -x --audio-format mp3 -o "${filePath}" "${url}"`;
+        const command = `(command -v yt-dlp > /dev/null 2>&1 && yt-dlp || ./yt-dlp) --no-warnings -x --audio-format mp3 -o "${filePath}" "${url}"`;
 
         exec(command, (error, stdout, stderr) => {
             if (error) {

@@ -24,7 +24,8 @@ const execPromise = (command) => {
 export async function getMetadata(url) {
     try {
         // Use local if global not found (for Render)
-        const command = `(yt-dlp --version &> /dev/null && yt-dlp || ./yt-dlp) --no-warnings -j "${url}"`;
+        // command -v is more portable than --version check
+        const command = `(command -v yt-dlp > /dev/null 2>&1 && yt-dlp || ./yt-dlp) --no-warnings -j "${url}"`;
         const stdout = await execPromise(command);
 
         const metadata = JSON.parse(stdout);
