@@ -1,9 +1,8 @@
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const execFilePromise = promisify(execFile);
 
 export const generateFilePath = () => {
     const fileName = `${Date.now()}.mp3`;
@@ -16,18 +15,22 @@ export const generateFilePath = () => {
  * @param {string} filePath 
  * @returns {Promise<void>}
  */
-export const runYtDlp = (url, filePath) => {
-    return new Promise((resolve, reject) => {
-        // Use local if global not found
-        const command = `(command -v yt-dlp > /dev/null 2>&1 && yt-dlp || ./yt-dlp) --no-warnings -x --audio-format mp3 -o "${filePath}" "${url}"`;
+export const runYtDlp = async (url, filePath) => {
+    // Determine binary (fallback for local dev)
+    const localPath = path.join(process.cwd(), 'yt-dlp');
+    const importFs = await import('fs');
+    const command = importFs.default.existsSync(localPath) ? localPath : 'yt-dlp';
 
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                console.error('yt-dlp error:', error);
-                console.error('yt-dlp stderr:', stderr);
-                return reject(error);
-            }
-            resolve();
-        });
-    });
+    try {
+        await execFilePromise(command, [
+            '--no-warnings',
+            '-x',
+            '--audio-format', 'mp3',
+            '-o', filePath,
+            url
+        ]);
+    } catch (error) {
+        console.error('yt-dlp download error:', error.message);
+        throw error;
+    }
 };
