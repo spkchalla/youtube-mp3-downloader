@@ -33,7 +33,7 @@ if (MONGO_URI) {
         .then(() => console.log('MongoDB Connected'))
         .catch(err => console.error('MongoDB Connection Error:', err));
 } else {
-    console.warn('MONGO_URI not found in .env');
+    console.error('CRITICAL: MONGO_URI not found in environment variables');
 }
 
 app.use('/api/auth', authRoutes);
