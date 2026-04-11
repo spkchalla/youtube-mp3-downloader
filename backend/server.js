@@ -2,6 +2,9 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import authRoutes from './routes/authRoutes.js';
+import downloadRoutes from './routes/downloadRoutes.js';
+import songRoutes from './routes/songRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -19,6 +22,9 @@ if (MONGO_URI) {
 }
 
 app.use('/api/auth', authRoutes);
+app.use('/api/download', downloadRoutes);
+app.use('/api/songs', songRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/', (req, res) => {
     res.send(`Server running at ${PORT}`);
