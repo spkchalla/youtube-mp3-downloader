@@ -171,6 +171,12 @@ input:focus {
   color: var(--text);
 }
 
+.menu-toggle,
+.mobile-drawer,
+.drawer-overlay {
+  display: none;
+}
+
 /* Song Card Styles */
 .songs-grid {
   display: grid;
@@ -325,23 +331,45 @@ input:focus {
   background: rgba(148, 163, 184, 0.2);
   color: var(--text-muted);
 }
+
 /* Mobile Responsive Enhancements */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+  /* Default Mobile State (Portrait) */
+  @media (orientation: portrait) {
+    .nav-links {
+      display: none;
+    }
+
+    .menu-toggle {
+      display: block !important;
+      background: transparent;
+      color: var(--text);
+    }
+  }
+
+  /* Landscape State */
+  @media (orientation: landscape) {
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .menu-toggle {
+      display: none !important;
+    }
+
+    .mobile-drawer,
+    .drawer-overlay {
+      display: none !important;
+    }
+  }
+
   .navbar {
     padding: 1rem;
   }
 
-  .nav-links {
-    display: none;
-  }
-
-  .menu-toggle {
-    display: block !important;
-    background: transparent;
-    color: var(--text);
-  }
-
   .mobile-drawer {
+    display: flex;
     position: fixed;
     top: 0;
     right: 0;
@@ -350,13 +378,12 @@ input:focus {
     background: var(--bg);
     border-left: 1px solid var(--border);
     padding: 2rem;
-    display: flex;
     flex-direction: column;
     gap: 1.5rem;
     z-index: 1000;
     transform: translateX(100%);
     transition: transform 0.3s ease;
-    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
   }
 
   .mobile-drawer.open {
@@ -364,12 +391,13 @@ input:focus {
   }
 
   .drawer-overlay {
+    display: block;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     z-index: 999;
     opacity: 0;
