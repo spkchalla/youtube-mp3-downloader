@@ -5,12 +5,16 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js';
 import downloadRoutes from './routes/downloadRoutes.js';
 import songRoutes from './routes/songRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import playlistRoutes from './routes/playlistRoutes.js';
 
 const app = express();
+
+const __filename = fileURLToPath(import.meta.url);
 
 // Ensure temp directory exists
 if (!fs.existsSync('temp')) {
@@ -41,7 +45,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/download', downloadRoutes);
 app.use('/api/songs', songRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/playlist', playlistRoutes);
 
+// Serve frontend static files
 app.get('/', (req, res) => {
     res.send(`Server running at ${PORT}`);
 });

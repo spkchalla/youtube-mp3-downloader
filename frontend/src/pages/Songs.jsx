@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Download, Trash2, Music, Loader2, AlertTriangle } from 'lucide-react';
+import { Download, Trash2, Music, Loader2, AlertTriangle, Info, X } from 'lucide-react';
 
 const Songs = () => {
     const { user } = useAuth();
@@ -10,6 +10,7 @@ const Songs = () => {
     const [deleteId, setDeleteId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isDownloading, setIsDownloading] = useState(null);
+    const [selectedMetadataSong, setSelectedMetadataSong] = useState(null);
 
     useEffect(() => {
         fetchSongs();
@@ -102,6 +103,12 @@ const Songs = () => {
                                     {isDownloading === song._id ? <Loader2 className="animate-spin" size={18} /> : <><Download size={18} /> Download Again</>}
                                 </button>
                                 <button
+                                    onClick={() => setSelectedMetadataSong(song)}
+                                    style={{ background: 'var(--glass)', color: 'var(--text)', width: '80%', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', fontWeight: 'bold', padding: '8px', borderRadius: '12px' }}
+                                >
+                                    <Info size={18} /> Show Metadata
+                                </button>
+                                <button
                                     onClick={() => setDeleteId(song._id)}
                                     style={{ background: 'transparent', color: 'var(--error)', width: '80%', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center', fontWeight: 'bold' }}
                                 >
@@ -135,6 +142,29 @@ const Songs = () => {
                             >
                                 {isDeleting ? <Loader2 className="animate-spin" size={18} /> : 'Delete'}
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {selectedMetadataSong && (
+                <div className="modal-overlay">
+                    <div className="modal" style={{ maxWidth: '500px', textAlign: 'left' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                            <h2 style={{ fontSize: '20px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <Info size={24} color="var(--primary)" /> Song Metadata
+                            </h2>
+                            <button onClick={() => setSelectedMetadataSong(null)} style={{ background: 'transparent', color: 'var(--text-muted)' }}>
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', color: 'var(--text-muted)' }}>
+                            <p><strong style={{ color: 'var(--text)' }}>Title:</strong> {selectedMetadataSong.title}</p>
+                            <p><strong style={{ color: 'var(--text)' }}>Uploader:</strong> {selectedMetadataSong.uploader}</p>
+                            <p><strong style={{ color: 'var(--text)' }}>Duration:</strong> {Math.floor(selectedMetadataSong.duration / 60)}:{(selectedMetadataSong.duration % 60).toString().padStart(2, '0')}</p>
+                            <p><strong style={{ color: 'var(--text)' }}>Downloaded On:</strong> {new Date(selectedMetadataSong.createdAt).toLocaleString()}</p>
+                            <p><strong style={{ color: 'var(--text)' }}>Downloads:</strong> {selectedMetadataSong.downloadCount || 1}</p>
+                            <p><strong style={{ color: 'var(--text)' }}>YouTube URL:</strong> <a href={selectedMetadataSong.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>{selectedMetadataSong.url}</a></p>
                         </div>
                     </div>
                 </div>
