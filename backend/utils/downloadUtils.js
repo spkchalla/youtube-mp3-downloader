@@ -18,8 +18,10 @@ export const runYtDlp = async (url, filePath) => {
         const args = [
             '-m', 'yt_dlp',
             '--no-warnings',
-            '-x',
+            '-f', 'ba/b',
+            '--extract-audio',
             '--audio-format', 'mp3',
+            '--audio-quality', '0',
             '-o', filePath,
             url
         ];
