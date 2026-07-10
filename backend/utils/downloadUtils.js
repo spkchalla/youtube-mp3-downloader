@@ -15,7 +15,8 @@ export const generateFilePath = () => {
  */
 export const runYtDlp = async (url, filePath) => {
     try {
-        await execFilePromise('yt-dlp', [
+        await execFilePromise('python3', [
+            '-m', 'yt_dlp',
             '--no-warnings',
             '-x',
             '--audio-format', 'mp3',

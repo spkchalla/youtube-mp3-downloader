@@ -9,7 +9,8 @@ const execFilePromise = promisify(execFile);
  */
 export const getMetadata = async (url) => {
     try {
-        const { stdout } = await execFilePromise('yt-dlp', [
+        const { stdout } = await execFilePromise('python3', [
+            '-m', 'yt_dlp',
             '--no-warnings',
             '-j',
             '--no-playlist',
@@ -29,7 +30,8 @@ export const getMetadata = async (url) => {
  */
 export const getPlaylistMetadata = async (url) => {
     try {
-        const { stdout } = await execFilePromise('yt-dlp', [
+        const { stdout } = await execFilePromise('python3', [
+            '-m', 'yt_dlp',
             '--no-warnings',
             '--flat-playlist',
             '-J',

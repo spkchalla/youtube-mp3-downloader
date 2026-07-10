@@ -14,6 +14,10 @@ import playlistRoutes from './routes/playlistRoutes.js';
 
 const app = express();
 
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: "UP", timestamp: new Date().toISOString() });
+});
+
 const __filename = fileURLToPath(import.meta.url);
 
 // Ensure temp directory exists
