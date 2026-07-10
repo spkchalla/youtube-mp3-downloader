@@ -11,6 +11,8 @@ const Songs = () => {
     const [isDeleting, setIsDeleting] = useState(false);
     const [isDownloading, setIsDownloading] = useState(null);
     const [selectedMetadataSong, setSelectedMetadataSong] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState('newest');
 
     useEffect(() => {
         fetchSongs();
@@ -70,18 +72,117 @@ const Songs = () => {
 
     if (loading) return <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center' }}><Loader2 className="animate-spin" /></div>;
 
+    const filteredAndSortedSongs = songs
+        .filter(song => {
+            if (!searchQuery) return true;
+            const query = searchQuery.toLowerCase();
+            return (
+                (song.title && song.title.toLowerCase().includes(query)) ||
+                (song.uploader && song.uploader.toLowerCase().includes(query))
+            );
+        })
+        .sort((a, b) => {
+            switch (sortBy) {
+                case 'oldest':
+                    return new Date(a.createdAt) - new Date(b.createdAt);
+                case 'title-asc':
+                    return (a.title || '').localeCompare(b.title || '');
+                case 'title-desc':
+                    return (b.title || '').localeCompare(a.title || '');
+                case 'longest':
+                    return (b.duration || 0) - (a.duration || 0);
+                case 'shortest':
+                    return (a.duration || 0) - (b.duration || 0);
+                case 'most-views':
+                    const aViews = a.rawMetadata?.view_count || 0;
+                    const bViews = b.rawMetadata?.view_count || 0;
+                    return bViews - aViews;
+                case 'newest':
+                default:
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+            }
+        });
+
+    const renderRawMetadata = (rawMetadata) => {
+        if (!rawMetadata) return <p style={{ color: 'var(--text-muted)' }}>No raw metadata available (old download).</p>;
+        
+        // Filter out massive internal arrays or objects for better readability
+        const filteredKeys = Object.keys(rawMetadata).filter(k => 
+            !['formats', 'thumbnails', 'subtitles', 'automatic_captions', 'fragments', 'heatmap'].includes(k) &&
+            rawMetadata[k] !== null
+        );
+
+        return (
+            <div style={{ 
+                background: 'var(--glass)', 
+                padding: '16px', 
+                borderRadius: '8px', 
+                maxHeight: '400px', 
+                overflowY: 'auto',
+                fontSize: '13px',
+                fontFamily: 'monospace'
+            }}>
+                {filteredKeys.map(key => (
+                    <div key={key} style={{ marginBottom: '8px', wordBreak: 'break-word' }}>
+                        <strong style={{ color: 'var(--primary)' }}>{key}: </strong>
+                        <span style={{ color: 'var(--text-muted)' }}>
+                            {typeof rawMetadata[key] === 'object' ? JSON.stringify(rawMetadata[key]) : String(rawMetadata[key])}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        );
+    };
+
     return (
         <div style={{ padding: '40px 20px', maxWidth: '1200px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '28px', fontWeight: '800', marginBottom: '32px' }}>Your Songs</h1>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', gap: '16px' }}>
+                <h1 style={{ fontSize: '28px', fontWeight: '800' }}>Your Songs</h1>
+                
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end' }}>
+                    <input 
+                        type="text" 
+                        placeholder="Search songs..." 
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{ maxWidth: '300px', background: 'var(--card-bg)' }}
+                    />
+                    <select 
+                        value={sortBy} 
+                        onChange={(e) => setSortBy(e.target.value)}
+                        style={{ 
+                            padding: '12px 16px', 
+                            background: 'var(--card-bg)', 
+                            border: '1px solid var(--border)', 
+                            borderRadius: '12px', 
+                            color: 'var(--text)',
+                            outline: 'none',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="title-asc">Title (A-Z)</option>
+                        <option value="title-desc">Title (Z-A)</option>
+                        <option value="longest">Longest First</option>
+                        <option value="shortest">Shortest First</option>
+                        <option value="most-views">Most Views (If Available)</option>
+                    </select>
+                </div>
+            </div>
 
             {songs.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '80px', background: 'var(--card-bg)', borderRadius: '32px', border: '1px solid var(--border)' }}>
                     <Music size={48} color="var(--text-muted)" style={{ marginBottom: '16px' }} />
                     <p style={{ color: 'var(--text-muted)' }}>No songs downloaded yet.</p>
                 </div>
+            ) : filteredAndSortedSongs.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '80px', background: 'var(--card-bg)', borderRadius: '32px', border: '1px solid var(--border)' }}>
+                    <p style={{ color: 'var(--text-muted)' }}>No songs match your search criteria.</p>
+                </div>
             ) : (
                 <div className="songs-grid">
-                    {songs.map(song => (
+                    {filteredAndSortedSongs.map(song => (
                         <div key={song._id} className="song-card">
                             <img src={song.thumbnail} alt={song.title} className="song-thumbnail" />
                             <div className="song-info">
@@ -149,22 +250,25 @@ const Songs = () => {
 
             {selectedMetadataSong && (
                 <div className="modal-overlay">
-                    <div className="modal" style={{ maxWidth: '500px', textAlign: 'left' }}>
+                    <div className="modal" style={{ maxWidth: '600px', width: '95%', textAlign: 'left', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h2 style={{ fontSize: '20px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <Info size={24} color="var(--primary)" /> Song Metadata
+                                <Info size={24} color="var(--primary)" /> Full Metadata
                             </h2>
                             <button onClick={() => setSelectedMetadataSong(null)} style={{ background: 'transparent', color: 'var(--text-muted)' }}>
                                 <X size={24} />
                             </button>
                         </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', color: 'var(--text-muted)' }}>
-                            <p><strong style={{ color: 'var(--text)' }}>Title:</strong> {selectedMetadataSong.title}</p>
-                            <p><strong style={{ color: 'var(--text)' }}>Uploader:</strong> {selectedMetadataSong.uploader}</p>
-                            <p><strong style={{ color: 'var(--text)' }}>Duration:</strong> {Math.floor(selectedMetadataSong.duration / 60)}:{(selectedMetadataSong.duration % 60).toString().padStart(2, '0')}</p>
-                            <p><strong style={{ color: 'var(--text)' }}>Downloaded On:</strong> {new Date(selectedMetadataSong.createdAt).toLocaleString()}</p>
-                            <p><strong style={{ color: 'var(--text)' }}>Downloads:</strong> {selectedMetadataSong.downloadCount || 1}</p>
-                            <p><strong style={{ color: 'var(--text)' }}>YouTube URL:</strong> <a href={selectedMetadataSong.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>{selectedMetadataSong.url}</a></p>
+                        <div style={{ flex: 1, overflowY: 'auto' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--text-muted)', marginBottom: '16px', background: 'var(--card-bg)', padding: '16px', borderRadius: '12px' }}>
+                                <p><strong style={{ color: 'var(--text)' }}>Title:</strong> {selectedMetadataSong.title}</p>
+                                <p><strong style={{ color: 'var(--text)' }}>Uploader:</strong> {selectedMetadataSong.uploader}</p>
+                                <p><strong style={{ color: 'var(--text)' }}>Duration:</strong> {Math.floor(selectedMetadataSong.duration / 60)}:{(selectedMetadataSong.duration % 60).toString().padStart(2, '0')}</p>
+                                <p><strong style={{ color: 'var(--text)' }}>Downloaded On:</strong> {new Date(selectedMetadataSong.createdAt).toLocaleString()}</p>
+                            </div>
+                            
+                            <h3 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '12px', marginTop: '24px' }}>Raw System Metadata</h3>
+                            {renderRawMetadata(selectedMetadataSong.rawMetadata)}
                         </div>
                     </div>
                 </div>
