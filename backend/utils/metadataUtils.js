@@ -12,6 +12,7 @@ export const getMetadata = async (url) => {
         const args = [
             '-m', 'yt_dlp',
             '--no-warnings',
+            '--extractor-args', 'youtube:client=tv',
             '-j',
             '--no-playlist',
             url
@@ -37,6 +38,7 @@ export const getPlaylistMetadata = async (url) => {
         const args = [
             '-m', 'yt_dlp',
             '--no-warnings',
+            '--extractor-args', 'youtube:client=tv',
             '--flat-playlist',
             '-J',
             url

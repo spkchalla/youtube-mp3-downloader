@@ -18,6 +18,7 @@ export const runYtDlp = async (url, filePath) => {
         const args = [
             '-m', 'yt_dlp',
             '--no-warnings',
+            '--extractor-args', 'youtube:client=tv',
             '-f', 'ba/b',
             '--extract-audio',
             '--audio-format', 'mp3',
