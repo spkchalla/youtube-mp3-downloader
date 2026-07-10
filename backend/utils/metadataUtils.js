@@ -9,13 +9,17 @@ const execFilePromise = promisify(execFile);
  */
 export const getMetadata = async (url) => {
     try {
-        const { stdout } = await execFilePromise('python3', [
+        const args = [
             '-m', 'yt_dlp',
             '--no-warnings',
             '-j',
             '--no-playlist',
             url
-        ]);
+        ];
+        if (process.env.YT_COOKIES) {
+            args.splice(2, 0, '--cookies', '/tmp/cookies.txt');
+        }
+        const { stdout } = await execFilePromise('python3', args);
 
         return JSON.parse(stdout);
     } catch (error) {
@@ -30,13 +34,17 @@ export const getMetadata = async (url) => {
  */
 export const getPlaylistMetadata = async (url) => {
     try {
-        const { stdout } = await execFilePromise('python3', [
+        const args = [
             '-m', 'yt_dlp',
             '--no-warnings',
             '--flat-playlist',
             '-J',
             url
-        ]);
+        ];
+        if (process.env.YT_COOKIES) {
+            args.splice(2, 0, '--cookies', '/tmp/cookies.txt');
+        }
+        const { stdout } = await execFilePromise('python3', args);
 
         const parsed = JSON.parse(stdout);
         // YouTube playlists returned by yt-dlp -J have an 'entries' array

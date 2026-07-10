@@ -5,6 +5,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import fs from 'fs';
+import path from 'path';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/authRoutes.js';
 import downloadRoutes from './routes/downloadRoutes.js';
@@ -24,6 +25,16 @@ const __filename = fileURLToPath(import.meta.url);
 if (!fs.existsSync('temp')) {
     fs.mkdirSync('temp');
     console.log('Created temp directory');
+}
+
+if (process.env.YT_COOKIES) {
+    const cookiesPath = path.join('/tmp', 'cookies.txt');
+    try {
+        fs.writeFileSync(cookiesPath, process.env.YT_COOKIES, { encoding: 'utf-8' });
+        console.log('Successfully wrote YT_COOKIES to /tmp/cookies.txt');
+    } catch (err) {
+        console.error('Failed to write YT_COOKIES:', err);
+    }
 }
 
 app.use(cors({
