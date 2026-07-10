@@ -29,6 +29,9 @@ const songSchema = new mongoose.Schema({
     downloadCount: {
         type: Number,
         default: 1
+    },
+    rawMetadata: {
+        type: mongoose.Schema.Types.Mixed
     }
 }, {
     timestamps: true

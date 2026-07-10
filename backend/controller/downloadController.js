@@ -43,6 +43,7 @@ export const downloadMp3 = async (req, res) => {
                 duration,
                 uploader,
                 videoId,
+                rawMetadata: metadata,
                 $inc: { downloadCount: 1 }
             },
             { upsert: true, new: true }
