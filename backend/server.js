@@ -30,7 +30,10 @@ if (!fs.existsSync('temp')) {
 if (process.env.YT_COOKIES) {
     const cookiesPath = path.join('/tmp', 'cookies.txt');
     try {
-        fs.writeFileSync(cookiesPath, process.env.YT_COOKIES, { encoding: 'utf-8' });
+        let cookieContent = process.env.YT_COOKIES;
+        // Standardize newlines if they got squashed into a single line text block
+        cookieContent = cookieContent.replace(/\\n/g, '\n');
+        fs.writeFileSync(cookiesPath, cookieContent, { encoding: 'utf-8' });
         console.log('Successfully wrote YT_COOKIES to /tmp/cookies.txt');
     } catch (err) {
         console.error('Failed to write YT_COOKIES:', err);
